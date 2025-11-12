@@ -28,8 +28,10 @@ while True:
 
     # Prepare track IDs and names, skipping invalid tracks
     track_ids = [item['track']['id'] for item in tracks if item['track'] and item['track']['id']]
-    track_names = [item['track']['name'] + " - " + item['track']['artists'][0]['name'] 
-    for item in tracks if item['track'] and item['track']['id']]
+    track_names = [
+        item['track']['name'] + " - " + ", ".join([artist['name'] for artist in item['track']['artists']])
+        for item in tracks if item['track'] and item['track']['id']
+    ]
 
     def chunks(lst, n):
         """Yield successive n-sized chunks from lst."""
@@ -37,8 +39,12 @@ while True:
             yield lst[i:i + n]
 
     already_liked = []
-    for chunk in chunks(track_ids, 50):
-        already_liked.extend(sp.current_user_saved_tracks_contains(chunk))
+    try:
+        for chunk in chunks(track_ids, 50):
+            already_liked.extend(sp.current_user_saved_tracks_contains(chunk))
+    except spotipy.SpotifyException as e:
+        print(f"Error checking saved tracks: {e}")
+        already_liked = []
 
     # Identify missing tracks
     missing_tracks = [track_names[i] for i, liked in enumerate(already_liked) if not liked]
@@ -54,5 +60,9 @@ while True:
         # Optional: Add missing songs to Liked Songs
         add = input("\nDo you want to add the missing songs to your Liked Songs? (y/n): ").lower()
         if add == "y":
-            sp.current_user_saved_tracks_add(missing_ids)
+            for chunk in chunks(missing_ids, 50):
+                try:
+                    sp.current_user_saved_tracks_add(chunk)
+                except spotipy.SpotifyException as e:
+                    print(f"Error adding tracks: {e}")
             print("✅ Missing songs added to your Liked Songs!")
