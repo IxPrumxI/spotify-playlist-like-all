@@ -1,3 +1,4 @@
+# ChatGPT created
 # Spotify Playlist Liker
 
 A Python script to check all tracks in a Spotify playlist and add missing songs to your Liked Songs.
