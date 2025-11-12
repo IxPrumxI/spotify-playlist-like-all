@@ -6,10 +6,11 @@ import os
 load_dotenv()
 
 scope = "playlist-read-private user-library-read user-library-modify"
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+
 while True:
     playlist_link = input("Paste the playlist link: ").strip()
 
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
     # Extract playlist ID from the link
     if "playlist/" in playlist_link:
         playlist_id = playlist_link.split("playlist/")[1].split("?")[0]
